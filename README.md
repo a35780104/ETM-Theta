@@ -1,59 +1,26 @@
 # ETM
+1.目前版本，模型吃的Data(吃資料的程式碼在ETM/data.py)似乎只吃data_espy_tweets.py生成的dataset(matrix and terms)
+2.使用自定義word embedding的程式碼在ETM/data.py/class read_embedding_matrix
+3.因為抓Theta值是自行改寫的，目前有一個bug "mat1 and mat2 shapes cannot be multiplied" 維度不同的狀況。
+原因是在 data_nyt.py 和 data_no_test.py 這兩個生成資料預處理的程式中，有一部份程式碼是:假如 測試集vocab(test)和驗證集vocab(val) 裡面有出現 在訓練集vocab(train) 沒有出現過的字詞，就會把那個字詞刪掉，以至於在 data_no_test.py 中生成的vocab，刪除後的數量與 data_nyt.py 生成且刪除後的數量不一樣，因為data_no_test.py這個程式主要就是故意生成沒有測試集跟驗證集的資料，才能拿到所有的document theta。
 
-This is code that accompanies the paper titled "Topic Modeling in Embedding Spaces" by Adji B. Dieng, Francisco J. R. Ruiz, and David M. Blei. (Arxiv link: https://arxiv.org/abs/1907.04907)
+執行流程
+執行前，先用scripts底下的data_no_test.py以及data_nyt.py預處理文件，生成資料集。data_nyt.py 的資料 for 訓練模型;data_no_test.py的資料for評估模型。(注意資料路徑，修改檔名)生成的資料集會在script/min_df_100 or script/no_test_min_df_100底下
 
-ETM defines words and topics in the same embedding space. The likelihood of a word under ETM is a Categorical whose natural parameter is given by the dot product between the word embedding and its assigned topic's embedding. ETM is a document model that learns interpretable topics and word embeddings and is robust to large vocabularies that include rare words and stop words.
+訓練ETM前，將script/min_df_100 or script/no_test_min_df_100底下的資料，全部複製到ETM/data/20ng，並注意main.py裡的data路徑是不是data/20ng(沒改就沒問題)
 
-## Dependencies
+在生成資料集時，因為停用字、字詞還原和字詞頻率少於或高於參數會刪掉字詞，處理到最後可能會有完全沒有字詞的document/patent的brief，程式會刪掉空白的document/patent的brief，所以有時你的原始數據跟出來的結果數量不同。(scripts底下removed_doc.txt會記錄第幾個document被刪掉)
 
-+ python 3.6.7
-+ pytorch 1.1.0
-
-## Datasets
-
-All the datasets are pre-processed and can be found below:
-
-+ https://bitbucket.org/franrruiz/data_nyt_largev_4/src/master/
-+ https://bitbucket.org/franrruiz/data_nyt_largev_5/src/master/
-+ https://bitbucket.org/franrruiz/data_nyt_largev_6/src/master/
-+ https://bitbucket.org/franrruiz/data_nyt_largev_7/src/master/
-+ https://bitbucket.org/franrruiz/data_stopwords_largev_2/src/master/ (this one contains stop words and was used to showcase robustness of ETM to stop words.)
-+ https://bitbucket.org/franrruiz/data_20ng_largev/src/master/
-
-All the scripts to pre-process a given dataset for ETM can be found in the folder 'scripts'. The script for 20NewsGroup is self-contained as it uses scikit-learn. If you want to run ETM on your own dataset, follow the script for New York Times (given as example) called data_nyt.py  
-
-## To Run
-
-To learn interpretable embeddings and topics using ETM on the 20NewsGroup dataset, run
+訓練執行  ($train_embeddings 1 是由模型自行訓練Embedding)
 ```
 python main.py --mode train --dataset 20ng --data_path data/20ng --num_topics 50 --train_embeddings 1 --epochs 1000
 ```
+訓練後的模型都存放在result資料夾裡
 
-To evaluate perplexity on document completion, topic coherence, topic diversity, and visualize the topics/embeddings run
+評估模型獲得每個document的theta值 執行
 ```
-python main.py --mode eval --dataset 20ng --data_path data/20ng --num_topics 50 --train_embeddings 1 --tc 1 --td 1 --load_from CKPT_PATH
+python main.py --mode eval --dataset 20ng --data_path data/20ng --num_topics 50 --train_embeddings 1 --tc 1 --td 1 --load_from MODEL_FILENAME
 ```
+($num_topic 設定跟模型一樣的Topic數量)
 
-To learn interpretable topics using ETM with pre-fitted word embeddings (called Labelled-ETM in the paper) on the 20NewsGroup dataset:
-
-+ first fit the word embeddings. For example to use simple skipgram you can run
-```
-python skipgram.py --data_file PATH_TO_DATA --emb_file PATH_TO_EMBEDDINGS --dim_rho 300 --iters 50 --window_size 4 
-```
-
-+ then run the following 
-```
-python main.py --mode train --dataset 20ng --data_path data/20ng --emb_path PATH_TO_EMBEDDINGS --num_topics 50 --train_embeddings 0 --epochs 1000
-```
-
-## Citation
-
-```
-@article{dieng2019topic,
-  title={Topic modeling in embedding spaces},
-  author={Dieng, Adji B and Ruiz, Francisco J R and Blei, David M},
-  journal={arXiv preprint arXiv:1907.04907},
-  year={2019}
-}
-```
-
+要獲得每document的theta值，執行get_doc_topic_csv.ipynb，程式會將你的原檔跟評估模型後存下來的theta值做比對，並生成csv檢視。(輸入的資料須有 資料原檔、被刪除的document數字、評估模型後的theta值)
