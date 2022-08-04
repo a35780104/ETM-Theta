@@ -1,7 +1,10 @@
 # ETM
 1.目前版本，模型吃的Data(吃資料的程式碼在ETM/data.py)似乎只吃data_espy_tweets.py生成的dataset(matrix and terms)
+
 2.使用自定義word embedding的程式碼在ETM/data.py/class read_embedding_matrix
+
 3.因為抓Theta值是自行改寫的，目前有一個bug "mat1 and mat2 shapes cannot be multiplied" 維度不同的狀況。
+
 原因是在 data_nyt.py 和 data_no_test.py 這兩個生成資料預處理的程式中，有一部份程式碼是:假如 測試集vocab(test)和驗證集vocab(val) 裡面有出現 在訓練集vocab(train) 沒有出現過的字詞，就會把那個字詞刪掉，以至於在 data_no_test.py 中生成的vocab，刪除後的數量與 data_nyt.py 生成且刪除後的數量不一樣，因為data_no_test.py這個程式主要就是故意生成沒有測試集跟驗證集的資料，才能拿到所有的document theta。
 
 執行流程
