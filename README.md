@@ -7,6 +7,8 @@
 
 原因是在 data_nyt.py 和 data_no_test.py 這兩個生成資料預處理的程式中，有一部份程式碼是:假如 測試集vocab(test)和驗證集vocab(val) 裡面有出現 在訓練集vocab(train) 沒有出現過的字詞，就會把那個字詞刪掉，以至於在 data_no_test.py 中生成的vocab，刪除後的數量與 data_nyt.py 生成且刪除後的數量不一樣，因為data_no_test.py這個程式主要就是故意生成沒有測試集跟驗證集的資料，才能拿到所有的document theta。
 
+4.自行改寫的部分在ETM/main.py裡最下面有註解
+
 ## 執行流程
 
 ### 1.
