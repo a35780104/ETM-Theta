@@ -360,6 +360,7 @@ else:
                 print('word: {} .. etm neighbors: {}'.format(word, nearest_neighbors(word, rho_etm, vocab)))
             print('\n')
 
+# 參照eval mode改寫
 def get_document_topic_dist(model, device, vocab_size, num_docs_train, batch_size):
     model.to(device)
     model.eval()
@@ -380,6 +381,7 @@ def get_document_topic_dist(model, device, vocab_size, num_docs_train, batch_siz
 
         return torch.cat(tuple(thetas), 0)
     
+# 參照data.py/class _fetch改寫    
 def no_test_fetch(path, name):
     token_file = os.path.join(path, 'bow_tr_tokens.mat')
     count_file = os.path.join(path, 'bow_tr_counts.mat')
@@ -389,6 +391,7 @@ def no_test_fetch(path, name):
     
     return {'tokens': tokens, 'counts': counts}
 
+# 參照data.py/class get_data改寫    
 def no_test_get_data(path):
     with open(os.path.join(path, 'vocab.pkl'), 'rb') as f:
         vocab = pickle.load(f)
@@ -397,6 +400,7 @@ def no_test_get_data(path):
 
     return vocab, train
 
+#取得所有document dataset
 v, t = no_test_get_data('/mnt/sdb/home/senior/B10656028/old_ETM/ETM/scripts/no_test_min_df_100/')
 train_tokens = t['tokens']
 train_counts = t['counts']
